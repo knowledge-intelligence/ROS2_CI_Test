@@ -1,0 +1,68 @@
+name: Test
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  individual-setup-build-test:
+    name: Individual Setup, Build and Test
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [humble, iron]
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Checkout ROS 2 examples
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: ros2/examples
+          ref: ${{ matrix.distro }}
+          path: examples
+          sparse-checkout: |
+            rclcpp/topics
+            rclpy/topics
+
+      - name: Setup workspace
+        uses: ichiro-its/ros2-ws-action/setup@v1.0.0
+        with:
+          distro: ${{ matrix.distro }}
+
+      - name: Build workspace
+        uses: ichiro-its/ros2-ws-action/build@v1.0.0
+        with:
+          distro: ${{ matrix.distro }}
+
+      - name: Test workspace
+        uses: ichiro-its/ros2-ws-action/test@v1.0.0   
+        with:
+          distro: ${{ matrix.distro }}
+
+  setup-build-test:
+    name: Setup, Build and Test
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [humble, iron]
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Checkout ROS 2 examples
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: ros2/examples
+          ref: ${{ matrix.distro }}
+          path: examples
+          sparse-checkout: |
+            rclcpp/topics
+            rclpy/topics
+
+      - name: Setup, build and test workspace
+        uses: ichiro-its/ros2-ws-action@v1.0.0
+        with:
+          distro: ${{ matrix.distro }}
